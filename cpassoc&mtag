@@ -1,1 +1,171 @@
+setwd("D:/mengdeer/cpassoc")
+
+###  ibd  with  ap
+finngen_ACUTPANC.mtag <- fread("finngen_ACUTPANC.mtag",header = T)
+
+library(dplyr)
+
+DF = merge(ibd294.cpass,finngen_ACUTPANC.mtag,by.x="ID",by.y="snpid",all = T)
+X = dplyr::select(DF,c('ID','Z','z'))
+colnames(X) = c("SNP","Z.ibd","Z.ap")
+X_1 = na.omit(X)
+
+
+
+
+X_1 <- X_1 %>% distinct(SNP,.keep_all = TRUE)#去重
+
+X <- X_1 %>% distinct(SNP,.keep_all = TRUE)#去重
+
+write.table(X,"ibd.ap.snp.z1.z2.txt",col.names = T,quote = F,row.names = F,sep = "\t")
+
+X = X[,-1]
+CorrMatrix <- cor(X)
+196881
+SampleSize = c(65642,198166)
+
+###  SHet
+x =  SHet(X = X, SampleSize = SampleSize, CorrMatrix = CorrMatrix, correct = 1,  isAllpossible = T)#isAllpossible=T时，运行的时间较久。
+SHet=as.matrix(x)
+
+p.shet<-pchisq(SHet, df = 1, ncp = 0, lower.tail = F)##获取p值
+
+
+### SHom
+shom = SHom(X=X,SampleSize = SampleSize,CorrMatrix = CorrMatrix)
+SHom = as.matrix(shom)
+
+p.shom<-pchisq(shom, df = 1, ncp = 0, lower.tail = F)##获取p值
+write.table(SHom,file = 'SHom.txt',row.names = T,quote = F,sep = '\t')
+
+res.shom<-data.frame(X_1[,"SNP"],p.shom)
+
+
+res.ibd.ap.cpass <-data.frame(res.shom[,c(1,2)],p.shet)
+names(res.ibd.ap.cpass)<-c("SNP","p.shom","p.shet")
+
+ibd.ap.cpass.with.p <- merge(res.ibd.ap.cpass,finngen_ACUTPANC.mtag,by.x = "SNP" ,by.y = "snpid" )
+ibd.ap.cpass.with.p <- merge(ibd.ap.cpass.with.p,ibd294,by.x = "SNP" ,by.y = "ID")
+
+ibd.ap.cpass.with.p.positive <- subset(ibd.ap.cpass.with.p, p.shet < 5e-8 & pval < 1e-3 & PV < 1e-3)
+
+write.table(ibd.ap.cpass.with.p.positive,"ibd.ap.cpass.with.p.positive",row.names = T,col.names=F, quote = F,sep = '\t')
+
+
+finngen_ACUTPANC.mtag <- fread("finngen_ACUTPANC.mtag",header = T)
+cd.30.full <- fread("cd.30.full.txt")
+
+
+
+cd.30.cpass <- cd.30.full[,c(4,10,11)]
+library(dplyr)
+library(data.table)
+DF = merge(cd.30.cpass,finngen_ACUTPANC.mtag,by.x="ID",by.y="snpid",all = T)
+X = dplyr::select(DF,c('ID','Z','z'))
+colnames(X) = c("SNP","Z.cd","Z.ap")
+X_1 = na.omit(X)
+rm(DF)
+
+X_1 <- X_1 %>% distinct(SNP,.keep_all = TRUE)#去重
+
+X <- X %>% distinct(SNP,.keep_all = TRUE)#去重
+
+write.table(X,"ibd.ap.snp.z1.z2.txt",col.names = T,quote = F,row.names = F,sep = "\t")
+
+X_1 = X_1[,-1]
+
+CorrMatrix <- cor(X_1)
+196881
+SampleSize = c(20883,198166)
+
+###  SHet 
+x =  SHet(X = X_1, SampleSize = SampleSize, CorrMatrix = CorrMatrix, correct = 1,  isAllpossible = T)#isAllpossible=T时，运行的时间较久。
+SHet=as.matrix(x)
+
+p.shet<-pchisq(SHet, df = 1, ncp = 0, lower.tail = F)##获取p值
+
+
+
+### SHom 
+shom = SHom(X=X_1,SampleSize = SampleSize,CorrMatrix = CorrMatrix)
+SHom = as.matrix(shom)
+
+p.shom<-pchisq(shom, df = 1, ncp = 0, lower.tail = F)##获取p值
+X_1 = na.omit(X)
+
+X_1 <- X_1 %>% distinct(SNP,.keep_all = TRUE)#去重
+res.cd.ap.cpass<-data.frame(X_1[,"SNP"],p.shom,p.shet)
+
+
+
+colnames(res.cd.ap.cpass)[1] <- "snp"
+
+
+cd.ap.cpass.with.p <- merge(res.cd.ap.cpass,finngen_ACUTPANC.mtag, by.x = "SNP" ,by.y = "snpid" )
+cd.ap.cpass.with.p <- merge(cd.ap.cpass.with.p,cd.30.full,by.x = "SNP" ,by.y = "ID")
+
+cd.ap.cpass.with.p.positive <- subset(cd.ap.cpass.with.p, p.shet < 5e-8 & pval < 1e-2 & PV < 1e-3 )
+
+cd.ap.cpass.with.p.positive <- subset(cd.ap.cpass.with.p, p.shet < 5e-8 & pval < 1e-3 & PV < 1e-3 & ES >0)
+
+
+
+write.table(cd.ap.cpass.with.p.positive,"cd.30.ap.cpass.with.p.positive",row.names = F,col.names=T, quote = F,sep = '\t')
+
+###                  uc  ap
+finngen_ACUTPANC.mtag <- fread("finngen_ACUTPANC.mtag",header = T)
+exp.uc.a32 <- fread("exp.uc.a32.all")
+
+
+
+exp.uc.a32 <- exp.uc.a32[,c(3,8,9,10)]
+finngen_ACUTPANC.mtag <- finngen_ACUTPANC.mtag[,c(1,2,5,6,8)]
+DF = merge(exp.uc.a32,finngen_ACUTPANC.mtag,by.x="snpid",by.y="snpid",all = T)
+X = dplyr::select(DF,c('snpid','z.x','z.y'))
+colnames(X) = c("SNP","Z.uc","Z.ap")
+X_1 = na.omit(X)
+rm(DF)
+
+X_1 <- X_1 %>% distinct(SNP,.keep_all = TRUE)#去重
+
+X <- X %>% distinct(SNP,.keep_all = TRUE)#去重
+
+write.table(X,"ibd.ap.snp.z1.z2.txt",col.names = T,quote = F,row.names = F,sep = "\t")
+
+X_1 = X_1[,-1]
+
+CorrMatrix <- cor(X_1)
+196881
+SampleSize = c(27432,198166)
+
+###  SHet
+x =  SHet(X = X_1, SampleSize = SampleSize, CorrMatrix = CorrMatrix, correct = 1,  isAllpossible = T)#isAllpossible=T时，运行的时间较久。
+SHet=as.matrix(x)
+
+p.shet<-pchisq(SHet, df = 1, ncp = 0, lower.tail = F)##获取p值
+
+
+
+### SHom
+shom = SHom(X=X_1,SampleSize = SampleSize,CorrMatrix = CorrMatrix)
+SHom = as.matrix(shom)
+
+p.shom<-pchisq(shom, df = 1, ncp = 0, lower.tail = F)##获取p值
+X_1 = na.omit(X)
+
+X_1 <- X_1 %>% distinct(SNP,.keep_all = TRUE)#去重
+res.uc.ap.cpass<-data.frame(X_1[,"SNP"],p.shom,p.shet)
+
+
+
+colnames(res.uc.ap.cpass)[1] <- "snp"
+
+
+uc.ap.cpass.with.p <- merge(res.uc.ap.cpass,finngen_ACUTPANC.mtag, by.x = "SNP" ,by.y = "snpid" )
+uc.ap.cpass.with.p 
+uc.ap.cpass.with.p <- merge(uc.ap.cpass.with.p,exp.uc.a32,by.x = "SNP" ,by.y = "snpid")
+
+uc.ap.cpass.with.p.positive <- subset(uc.ap.cpass.with.p, p.shet < 5e-8 & pval.x < 1e-3 & pval.y < 1e-3 )
+write.table(uc.ap.cpass.with.p.positive,"uc.ap.cpass.with.p.positive",row.names = F,col.names=T, quote = F,sep = '\t')
+
 
