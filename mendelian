@@ -1,1 +1,49 @@
+###  uc> ap
+exposure_uc.32 <- extract_instruments("ieu-a-32",p1=5e-8,p2=5e-8,r2 = 0.01,access_token = NULL)
+outcome_dat.ap<-extract_outcome_data(snps=exposure_uc.32$SNP,outcomes="finn-b-K11_ACUTPANC",proxies = F)
+
+merged_data.uc.a32.finn.ap <- harmonise_data(exposure_dat = exposure_uc.32, outcome_dat = outcome_dat.ap ,action = 2)
+MRRES.merged_data.uc.a32.finn.ap <- mr(merged_data.uc.a32.finn.ap)
+
+
+###  uc > cp
+exposure_uc.32 <- extract_instruments("ieu-a-32",p1=5e-8,p2=5e-8,r2 = 0.01,access_token = NULL)
+outcome_dat.cp<-extract_outcome_data(snps=exposure_uc.32$SNP,outcomes="finn-b-K11_CHRONPANC",proxies = F)
+
+merged_data.uc.a32.finn.cp <- harmonise_data(exposure_dat = exposure_uc.32, outcome_dat = outcome_dat.cp ,action = 2)
+MRRES.merged_data.uc.a32.finn.cp <- mr(merged_data.uc.a32.finn.cp)
+
+
+###  cd 2 ap 
+exposure_cd.12 <- extract_instruments("ieu-a-12",p1=5e-8,p2=5e-8,r2 = 0.01)
+outcome_dat.ap<-extract_outcome_data(snps=exposure_cd.12$SNP,outcomes="finn-b-K11_ACUTPANC",proxies = F)
+
+merged_data.cd.a12.finn.ap <- harmonise_data(exposure_dat = exposure_cd.12, outcome_dat = outcome_dat.ap ,action = 2)
+MRRES.merged_data.cd.a12.finn.ap <- mr(merged_data.cd.a12.finn.ap)
+
+
+###  cd 2 cp
+exposure_uc.12 <- extract_instruments("ieu-a-12",p1=5e-8,p2=5e-8,r2 = 0.01)
+outcome_dat.cp<-extract_outcome_data(snps=exposure_uc.12$SNP,outcomes="finn-b-K11_CHRONPANC",proxies = F)
+
+merged_data.uc.a12.finn.cp <- harmonise_data(exposure_dat = exposure_uc.12, outcome_dat = outcome_dat.cp ,action = 2)
+MRRES.merged_data.uc.a12.finn.cp <- mr(merged_data.uc.a12.finn.cp)
+
+
+###IBD > AP
+exposure_ibd.31 <- extract_instruments("ieu-a-31",p1=5e-8,p2=5e-8,r2 = 0.01)
+outcome_dat.ap<-extract_outcome_data(snps=exposure_ibd.31$SNP,outcomes="finn-b-K11_ACUTPANC",proxies = F)
+
+merged_data.ibd.31.finn.ap <- harmonise_data(exposure_dat = exposure_ibd.31, outcome_dat = outcome_dat.ap ,action = 2)
+MRRES.merged_data.ibd.31.finn.ap <- mr(merged_data.ibd.31.finn.ap)
+
+###IBD > CP
+exposure_ibd.31 <- extract_instruments("ieu-a-31",p1=5e-8,p2=5e-8,r2 = 0.01)
+outcome_dat.cp<-extract_outcome_data(snps=exposure_ibd.31$SNP,outcomes="finn-b-K11_CHRONPANC",proxies = F)
+
+merged_data.ibd.31.finn.cp <- harmonise_data(exposure_dat = exposure_ibd.31, outcome_dat = outcome_dat.cp ,action = 2)
+MRRES.merged_data.ibd.31.finn.cp <- mr(merged_data.ibd.31.finn.cp)
+
+
+
 
