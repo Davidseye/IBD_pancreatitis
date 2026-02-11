@@ -1,1 +1,147 @@
+######################coloc
+
+df1 <- ibd294.full
+df1=data.frame(SNP=df1$ID,chrom=df1$CHROM,
+               pos=df1$POS,A1=df1$ALT,A2=df1$REF,beta=df1$ES,se=df1$SE)
+
+
+df2 <- hg19.finngen_R10_K11_ACUTPANC
+df2 <- hg19.finngen_R10_K11_CHRONPANC
+
+df2 <- data.frame(SNP=df2$rsids,chrom=df2$chrom,
+               pos=df2$pos,A1=df2$alt,
+               A2=df2$ref,beta=df2$beta,se=df2$sebeta)
+
+
+
+A <- 31106177  
+df1.2<-subset(df1,chrom=="chr6" & pos>=A-200000 & pos <=A+200000)
+df2.2<-subset(df2,chrom==6 & pos>=A-200000 & pos <=A+200000)
+
+
+dfall=merge(df1.2,df2.2,by="SNP")
+dfall = dfall[!duplicated(dfall$SNP),]
+
+
+dfall = dfall %>% filter((A1.x==A1.y&A2.x==A2.y)|(A1.x==A2.y&A2.x==A1.y)) 
+dfall = dfall %>% mutate(beta.y = ifelse(A1.x==A1.y,beta.y,-beta.y))
+
+
+dfall$VAR1 = dfall$se.x^2
+dfall$VAR2 =dfall$se.y^2
+dfall = dfall[dfall$VAR1!=0 & dfall$VAR2!=0 ,]
+
+cdf1= data.frame(beta=dfall$beta.x,varbeta=dfall$VAR1,snp=dfall$SNP)
+cdf2 =data.frame(beta=dfall$beta.y,varbeta=dfall$VAR2,snp=dfall$SNP)
+
+
+##cdf2 = list(snp=dfall$SNP,pvalues=dfall$P_VALUE,type="quant", N=dfall$N,MAF=dfall$af)
+cdf1 = as.list(cdf1)
+cdf2 = as.list(cdf2)
+
+cdf1$type = "cc"
+cdf2$type = "cc"
+
+
+
+res = coloc.abf(cdf1,cdf2,p1=1e-4,p2=1e-4,p12=1e-5)
+dfall <- merge(dfall,dc.eqtl,by.x="SNP",by.y = "snp")
+dfall$N <- 982
+dataset1=list(snp=dat$SNP,pvalues=dat$pval.exposure, type="quant", N=dat$samplesize.exposure,MAF=dat$eaf.exposure))
+res = coloc.abf(cdf1,dataset2 = list(snp=dfall$SNP,pvalues=dat$P_VALUE, type="quant", N=dfall$N,MAF=dfall$af),p1=1e-4,p2=1e-4,p12=1e-5)
+
+res$summary
+res$results
+sensitivity(res,"H4 > 0.9")
+View(res$results)
+
+
+
+
+## 16s
+setwd("D:/mengdeer/")
+setwd("D:/mengdeer/ibd.16s")
+setwd("D:/mengdeer/silva128")
+setwd("D:/mengdeer/cpassoc")
+
+library(tidyverse)
+library(microeco)
+library(file2meco)
+library(ggplot2)
+
+# use data files inside the file2meco package.
+abund_file_path <- system.file( "feature-table-final.qza", package="file2meco")
+tree_data <- system.file( "rooted-tree.qza", package="file2meco")
+rep_data <- system.file("repset-seqs-final.qza", package="file2meco")
+
+sample_file_path <- system.file("HTG.metadata", package="file2meco")
+taxonomy_file_path <- system.file("taxonomy.qza", package="file2meco")
+# construct microtable object
+
+
+tmp <- qiime2meco(abund_file_path, sample_table = sample_file_path, taxonomy_table = taxonomy_file_path,phylo_tree = tree_data,rep_fasta = rep_data, auto_tidy = TRUE)
+
+lefse <- trans_diff$new(dataset = tmp,
+                        method = "lefse", 
+                        group = "Group",
+                        alpha = 0.05, 
+                        lefse_subgroup = NULL)
+
+
+
+head(lefse$res_diff)
+lefse$plot_diff_bar(use_number = 1:50, 
+                    width = 0.8, 
+                    group_order = c("HTGP", "HTG", "HC"))
+
+
+abund <- rownames(lefse[["abund_table"]])
+abund <- as.data.frame(abund)
+abund <- rownames(lefse[["abund_table"]])
+
+
+
+
+
+##############   silva128
+abund_file_path <- system.file( "feature-table-final.qza", package="file2meco")
+tree_data <- system.file( "rooted-tree.qza", package="file2meco")
+rep_data <- system.file("repset-seqs-final.qza", package="file2meco")
+
+sample_file_path <- system.file("HTG.metadata", package="file2meco")
+taxonomy_file_path <- system.file("taxonomy.qza", package="file2meco")
+
+
+tmp <- qiime2meco(abund_file_path, sample_table = sample_file_path, taxonomy_table = taxonomy_file_path,phylo_tree = tree_data,rep_fasta = rep_data, auto_tidy = TRUE)
+
+lefse <- trans_diff$new(dataset = tmp,
+                        method = "lefse", 
+                        group = "Group",
+                        alpha = 0.15, 
+                        lefse_subgroup = NULL)
+
+lefse$plot_diff_bar(use_number = 1:50, 
+                    width = 0.8, 
+                    group_order = c("HTGP", "HTG", "HC"))
+
+
+HTG.meta <- read.table("HTG.metadata",header = T)
+abund.table <- as.data.frame(lefse[["abund_table"]])
+lefse_abund_table <- abund.table[rownames(abund.table)=="k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Ruminococcaceae|g__Ruminiclostridium 9",]
+lefse_abund_table_t <- as.data.frame(t(lefse_abund_table))  
+colnames(lefse_abund_table_t) <- "abund"
+lefse_abund_table_t$Run <- rownames(lefse_abund_table_t)
+merged_data <- merge(HTG.meta, lefse_abund_table_t,by.x="Run",by.y = "Run")  
+
+mean_values <- aggregate(  
+  merged_data[, "abund"],  
+  by = list(Group = merged_data$Group),  
+  FUN = mean  
+)  
+
+t.test.nc.htg <- merged_data[merged_data$Group!= "HTG",]
+t.test.nc.htg$group <- factor(t.test.nc.htg$group)
+t.test.nc.htg <- t.test.nc.htg[-34,]
+t_test <- t.test(abund~Group, t.test.nc.htg, paired = FALSE, alternative = 'two.sided')
+t_test
 
