@@ -1,1 +1,29 @@
 
+focus munge /data/ga1114h01/ibdap/hg19.finngen_R10_K11_ACUTPANC.clean --output ap.cleaned
+focus munge GWAS.txt --output GWAS.cleaned
+
+focus import GTExv8.EUR.Colon_Sigmoid.pos fusion --tissue Small_Intestine_Terminal_Ileum --name sm --assay  rnaseq  --output small_intes
+
+focus import GTExv8.EUR.Colon_Transverse.pos   fusion --tissue colon_t --name sm --assay  rnaseq  --output colon_t
+
+
+focus import GTExv8.EUR.Small_Intestine_Terminal_Ileum.pos fusion --tissue colon_s --name cs --assay  rnaseq  --output colon_s
+zcat ap.cleaned.sumstats.gz | awk 'BEGIN {OFS="\t"} {sub(/^chr/, "", $1); print}' | gzip > last.ap.cleaned.sumstats.gz
+
+nohup focus finemap  last.ap.cleaned.sumstats.gz /data/ga1114h01/twas/1000G_Phase3_plinkfiles/1000G_EUR_Phase3_plink/1000G.EUR.QC.5  small_intes.db --p-threshold 5e-06   --prior-prob "gencode37" --locations 37:EUR   --chr 5 --tissue small --out ap_small-chr5 &
+
+nohup focus finemap  last.ap.cleaned.sumstats.gz /data/ga1114h01/twas/1000G_Phase3_plinkfiles/1000G_EUR_Phase3_plink/1000G.EUR.QC.5    colon_s.db  --p-threshold 5e-06  --prior-prob "gencode37" --locations 37:EUR   --chr 5 --tissue col_s --out ap_col_s-chr5 &
+
+
+nohup focus finemap  last.ap.cleaned.sumstats.gz /data/ga1114h01/twas/1000G_Phase3_plinkfiles/1000G_EUR_Phase3_plink/1000G.EUR.QC.5    colon_t.db  --p-threshold 5e-06  --prior-prob "gencode37" --locations 37:EUR   --chr 5 --tissue col_t --out ap_col_t-chr5 &
+
+
+Cp
+
+nohup focus finemap  cp.clean.sumstats.gz /data/ga1114h01/twas/1000G_Phase3_plinkfiles/1000G_EUR_Phase3_plink/1000G.EUR.QC.5    small_intes.db  --p-threshold 5e-06  --prior-prob "gencode37" --locations 37:EUR   --chr 5 --tissue small_intes --out cp_small-chr5 &
+
+nohup focus finemap  cp.clean.sumstats.gz /data/ga1114h01/twas/1000G_Phase3_plinkfiles/1000G_EUR_Phase3_plink/1000G.EUR.QC.5    colon_s.db  --p-threshold 5e-06  --prior-prob "gencode37" --locations 37:EUR   --chr 5 --tissue col_s --out cp_col_s-chr5 &
+
+nohup focus finemap  cp.clean.sumstats.gz /data/ga1114h01/twas/1000G_Phase3_plinkfiles/1000G_EUR_Phase3_plink/1000G.EUR.QC.5    colon_t.db  --p-threshold 5e-06  --prior-prob "gencode37" --locations 37:EUR   --chr 5 --tissue col_t --out cp_col_t-chr5 &
+
+
