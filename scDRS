@@ -1,1 +1,318 @@
+########################################## scdrs
+./magma --gene-results /public/home/qihangm/drs/ap/ap.genebased.genes.raw  --set-annot /public/home/qihangm/drs/top10.txt --out /public/home/qihangm/drs/ap/tissue
+
+./magma --gene-results /public/home/qihangm/drs/cp.genebased.genes.raw  --set-annot /public/home/qihangm/drs/top10.txt --out /public/home/qihangm/drs/cp.scdrs/tissue
+
+genebased.genes.raw
+./magma --gene-results /public/home/qihangm/drs/uc/genebased.genes.raw  --set-annot /public/home/qihangm/drs/top10.txt --out /public/home/qihangm/drs/uc/tissue
+
+
+./magma --gene-results /public/home/qihangm/drs/ibd.genebased.genes.raw  --set-annot /public/home/qihangm/drs/top10.txt --out /public/home/qihangm/drs/ibd/tissue
+
+./magma --gene-results /public/home/qihangm/drs/cd.genebased.genes.raw  --set-annot /public/home/qihangm/drs/top10.txt --out /public/home/qihangm/drs/cd/tissue
+
+
+./magma --bfile /public/home/qihangm/drs/g1000_eur --pval /public/home/qihangm/drs/ibd294.ma N=65642 --gene-annot /public/home/qihangm/drs/g1000_eur.genes.annot --out /public/home/qihangm/drs/ibd.genebased
+
+awk '{print $1, $8}' ibd.genebased.genes.out > ibd.step2_genes.csv
+
+#####
+awk 'NF>1' finngen_ACUTPANC.magma > last.finngen_ACUTPANC.magma
+./magma --bfile /public/home/qihangm/drs/g1000_eur --pval /public/home/qihangm/drs/last.finngen_ACUTPANC.magma N=198166 --gene-annot /public/home/qihangm/drs/g1000_eur.genes.annot --out /public/home/qihangm/drs/ap.genebased
+
+awk '{print $1, $8}' ap.genebased.genes.out > ap.step2_genes.csv
+
+
+scdrs munge-gs \
+    --out-file /public/home/qihangm/drs/ap/ap.gs \
+    --zscore-file /public/home/qihangm/drs/ap/ap_genes.tsv \
+    --weight zscore \
+    --n-max 1000
+
+
+./magma --bfile /public/home/qihangm/drs/g1000_eur --pval cd30.magma N=20883 --gene-annot /public/home/qihangm/drs/g1000_eur.genes.annot --out /public/home/qihangm/drs/cd.genebased
+
+awk '{print $1, $8}' cd.genebased.genes.out > cd.step2_genes.csv
+scdrs munge-gs \
+    --out-file /public/home/qihangm/drs/cd/cd.gs \
+    --zscore-file /public/home/qihangm/drs/cd/cd_genes.tsv \
+    --weight zscore \
+    --n-max 1000
+
+./magma --bfile /public/home/qihangm/drs/g1000_eur --pval ap.magma N=198166 --gene-annot /public/home/qihangm/drs/g1000_eur.genes.annot --out /public/home/qihangm/drs/ap.genebased
+awk '{print $1, $8}' ap.genebased.genes.out > ap.step2_genes.csv
+scdrs munge-gs \
+    --out-file /public/home/qihangm/drs/ap/ap.gs \
+    --zscore-file /public/home/qihangm/drs/ap/ap_genes.tsv \
+    --weight zscore \
+    --n-max 1000
+
+./magma --bfile /public/home/qihangm/drs/g1000_eur --pval ibd.magma N=65642 --gene-annot /public/home/qihangm/drs/g1000_eur.genes.annot --out /public/home/qihangm/drs/ibd.genebased
+awk '{print $1, $8}' ibd.genebased.genes.out > ibd.step2_genes.csv
+scdrs munge-gs \
+    --out-file /public/home/qihangm/drs/ibd/ibd.gs \
+    --zscore-file /public/home/qihangm/drs/ibd/ibd_genes.tsv \
+    --weight zscore \
+    --n-max 1000
+
+./magma --bfile /public/home/qihangm/drs/g1000_eur --pval cd.magma N=20883 --gene-annot /public/home/qihangm/drs/g1000_eur.genes.annot --out /public/home/qihangm/drs/cd.genebased
+awk '{print $1, $8}' cd.genebased.genes.out > cd.step2_genes.csv
+scdrs munge-gs \
+    --out-file /public/home/qihangm/drs/cd/cd.gs \
+    --zscore-file /public/home/qihangm/drs/cd/cd_genes.tsv \
+    --weight zscore \
+    --n-max 1000
+
+./magma --bfile /public/home/qihangm/drs/g1000_eur --pval cp.magma N=196881 --gene-annot /public/home/qihangm/drs/g1000_eur.genes.annot --out /public/home/qihangm/drs/cp.genebased
+awk '{print $1, $8}' cp.genebased.genes.out > cp.step2_genes.csv
+scdrs munge-gs \
+    --out-file /public/home/qihangm/drs/cp/cp.gs \
+    --zscore-file /public/home/qihangm/drs/cp/cp_genes.tsv \
+    --weight zscore \
+    --n-max 1000
+
+### uc
+nohup scdrs compute-score \
+    --h5ad-file /public/home/qihangm/drs/giant.blood.normal.qtl.h5ad\
+    --h5ad-species human\
+    --gs-file /public/home/qihangm/drs/uc/final.ap.gs\
+    --gs-species human\
+    --out-folder /public/home/qihangm/drs/uc/\
+    --flag-filter-data True\
+    --flag-raw-count True\
+    --n-ctrl 1000\
+    --flag-return-ctrl-raw-score False\
+    --flag-return-ctrl-norm-score True   &
+
+nohup scdrs perform-downstream \
+    --h5ad-file /public/home/qihangm/drs/giant.blood.normal.qtl.h5ad\
+    --score-file /public/home/qihangm/drs/giant.blood/uc/z_score.full_score.gz\
+    --out-folder /public/home/qihangm/drs/giant.blood/uc/\
+    --group-analysis cell_type\
+    --gene-analysis\
+    --flag-filter-data True\
+    --flag-raw-count True &
+
+
+
+
+
+###cd
+
+nohup scdrs compute-score \
+    --h5ad-file /public/home/qihangm/drs/giant.blood.normal.qtl.h5ad\
+    --h5ad-species human\
+    --gs-file /public/home/qihangm/drs/cd/final.cd.gs\
+    --gs-species human\
+    --out-folder /public/home/qihangm/drs/cd/giant.blood\
+    --flag-filter-data True\
+    --flag-raw-count True\
+    --n-ctrl 1000\
+    --flag-return-ctrl-raw-score False\
+    --flag-return-ctrl-norm-score True   &
+
+nohup scdrs perform-downstream \
+    --h5ad-file /public/home/qihangm/drs/giant.blood.normal.qtl.h5ad\
+    --score-file /public/home/qihangm/drs/cd/giant.blood/z_score.full_score.gz\
+    --out-folder /public/home/qihangm/drs/cd/giant.blood\
+    --group-analysis cell_type\
+    --gene-analysis\
+    --flag-filter-data True\
+    --flag-raw-count True &
+
+
+
+### cp
+
+nohup scdrs compute-score \
+    --h5ad-file /public/home/qihangm/drs/giant.blood.normal.qtl.h5ad\
+    --h5ad-species human\
+    --gs-file /public/home/qihangm/drs/cp.scdrs/final.cp.gs\
+    --gs-species human\
+    --out-folder /public/home/qihangm/drs/giant.blood/cp\
+    --flag-filter-data True\
+    --flag-raw-count True\
+    --n-ctrl 1000\
+    --flag-return-ctrl-raw-score False\
+    --flag-return-ctrl-norm-score True   &
+
+nohup scdrs perform-downstream \
+    --h5ad-file /public/home/qihangm/drs/giant.blood.normal.qtl.h5ad\
+    --score-file /public/home/qihangm/drs/cp/giant.blood/z_score.full_score.gz\
+    --out-folder /public/home/qihangm/drs/cp/giant.blood\
+    --group-analysis cell_type\
+    --gene-analysis\
+    --flag-filter-data True\
+    --flag-raw-count True &
+
+###  ap
+
+nohup scdrs compute-score \
+    --h5ad-file /public/home/qihangm/drs/giant.blood.normal.qtl.h5ad\
+    --h5ad-species human\
+    --gs-file /public/home/qihangm/drs/ap.scdrs/final.ap.gs\
+    --gs-species human\
+    --out-folder /public/home/qihangm/drs/giant.blood/ap\
+    --flag-filter-data True\
+    --flag-raw-count True\
+    --n-ctrl 1000\
+    --flag-return-ctrl-raw-score False\
+    --flag-return-ctrl-norm-score True   &
+
+
+nohup scdrs perform-downstream \
+    --h5ad-file /public/home/qihangm/drs/giant.blood.normal.qtl.h5ad\
+    --score-file /public/home/qihangm/drs/ap/giant.blood/z_score.full_score.gz\
+    --out-folder /public/home/qihangm/drs/ap/giant.blood\
+    --group-analysis cell_type\
+    --gene-analysis\
+    --flag-filter-data True\
+    --flag-raw-count True &
+
+
+### ibd
+
+nohup scdrs compute-score \
+    --h5ad-file /public/home/qihangm/drs/giant.blood.normal.qtl.h5ad\
+    --h5ad-species human\
+    --gs-file /public/home/qihangm/drs/ibd.scdrs/final.ap.gs\
+    --gs-species human\
+    --out-folder /public/home/qihangm/drs/giant.blood/ibd\
+    --flag-filter-data True\
+    --flag-raw-count True\
+    --n-ctrl 1000\
+    --flag-return-ctrl-raw-score False\
+    --flag-return-ctrl-norm-score True   &
+
+
+nohup scdrs perform-downstream \
+    --h5ad-file /public/home/qihangm/drs/giant.blood.normal.qtl.h5ad\
+    --score-file /public/home/qihangm/drs/ibd/giant.blood/z_score.full_score.gz\
+    --out-folder /public/home/qihangm/drs/ibd/giant.blood\
+    --group-analysis cell_type\
+    --gene-analysis\
+    --flag-filter-data True\
+    --flag-raw-count True &
+
+
+###### immune
+## uc
+nohup scdrs compute-score \
+    --h5ad-file /public/home/qihangm/drs/TS_immune.h5ad\
+    --h5ad-species human\
+    --gs-file /public/home/qihangm/drs/uc/uc.gs\
+    --gs-species human\
+    --out-folder /public/home/qihangm/drs/immune/uc/\
+    --flag-filter-data True\
+    --flag-raw-count True\
+    --n-ctrl 1000\
+    --flag-return-ctrl-raw-score False\
+    --flag-return-ctrl-norm-score True   &
+
+nohup scdrs perform-downstream \
+    --h5ad-file /public/home/qihangm/drs/TS_immune.h5ad\
+    --score-file /public/home/qihangm/drs/immune/uc/z_score.full_score.gz\
+    --out-folder /public/home/qihangm/drs/immune/uc/\
+    --group-analysis cell_ontology_class\
+    --gene-analysis\
+    --flag-filter-data True\
+    --flag-raw-count True &
+
+
+
+#####################        ap 
+nohup scdrs compute-score \
+    --h5ad-file /public/home/qihangm/drs/TS_immune.h5ad\
+    --h5ad-species human\
+    --gs-file /public/home/qihangm/drs/ap/ap.gs\
+    --gs-species human\
+    --out-folder /public/home/qihangm/drs/ap/immu\
+    --flag-filter-data True\
+    --flag-raw-count True\
+    --n-ctrl 1000\
+    --flag-return-ctrl-raw-score False\
+    --flag-return-ctrl-norm-score True &
+
+
+nohup scdrs perform-downstream \
+    --h5ad-file /public/home/qihangm/drs/TS_immune.h5ad\
+    --score-file /public/home/qihangm/drs/ap/immu/z_score.full_score.gz\
+    --out-folder  /public/home/qihangm/drs/ap/immu\
+    --group-analysis cell_ontology_class\
+    --gene-analysis\
+    --flag-filter-data True\
+    --flag-raw-count True &
+
+#####################        ibd 
+nohup scdrs compute-score \
+    --h5ad-file /public/home/qihangm/drs/TS_immune.h5ad\
+    --h5ad-species human\
+    --gs-file /public/home/qihangm/drs/ibd/ibd.gs\
+    --gs-species human\
+    --out-folder /public/home/qihangm/drs/ibd/immu\
+    --flag-filter-data True\
+    --flag-raw-count True\
+    --n-ctrl 1000\
+    --flag-return-ctrl-raw-score False\
+    --flag-return-ctrl-norm-score True &
+
+
+nohup scdrs perform-downstream \
+    --h5ad-file /public/home/qihangm/drs/TS_immune.h5ad\
+    --score-file /public/home/qihangm/drs/ibd/immu/z_score.full_score.gz\
+    --out-folder  /public/home/qihangm/drs/ibd/immu\
+    --group-analysis cell_ontology_class\
+    --gene-analysis\
+    --flag-filter-data True\
+    --flag-raw-count True &
+
+
+###cp
+
+nohup scdrs compute-score \
+    --h5ad-file /public/home/qihangm/drs/TS_immune.h5ad\
+    --h5ad-species human\
+    --gs-file /public/home/qihangm/drs/cp.gs\
+    --gs-species human\
+    --out-folder /public/home/qihangm/drs/immune/cp\
+    --flag-filter-data True\
+    --flag-raw-count True\
+    --n-ctrl 1000\
+    --flag-return-ctrl-raw-score False\
+    --flag-return-ctrl-norm-score True   &
+
+nohup scdrs perform-downstream \
+    --h5ad-file /public/home/qihangm/drs/TS_immune.h5ad\
+    --score-file /public/home/qihangm/drs/immune/cp/z_score.full_score.gz\
+    --out-folder /public/home/qihangm/drs/immune/cp/\
+    --group-analysis cell_ontology_class\
+    --gene-analysis\
+    --flag-filter-data True\
+    --flag-raw-count True &
+
+
+
+####  cd
+
+nohup scdrs compute-score \
+    --h5ad-file /public/home/qihangm/drs/TS_immune.h5ad\
+    --h5ad-species human\
+    --gs-file /public/home/qihangm/drs/cd.gs\
+    --gs-species human\
+    --out-folder /public/home/qihangm/drs/immune/cd\
+    --flag-filter-data True\
+    --flag-raw-count True\
+    --n-ctrl 1000\
+    --flag-return-ctrl-raw-score False\
+    --flag-return-ctrl-norm-score True   &
+
+nohup scdrs perform-downstream \
+    --h5ad-file /public/home/qihangm/drs/TS_immune.h5ad\
+    --score-file /public/home/qihangm/drs/immune/cd/z_score.full_score.gz\
+    --out-folder /public/home/qihangm/drs/immune/cd/\
+    --group-analysis cell_ontology_class\
+    --gene-analysis\
+    --flag-filter-data True\
+    --flag-raw-count True &
+
 
